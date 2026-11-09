@@ -1,4 +1,4 @@
-# Knowledge Graph MTR
+# knowledgegraph_mtr_penguin
 
 这个仓库收集以香港港铁（MTR）为主题的 RDF 知识图谱示例，使用 Turtle（`.ttl`）格式描述数据、OWL 本体、SKOS 词汇表和 SHACL 约束。
 
@@ -14,7 +14,7 @@
 | `06-mtr-onto-data-vocab.ttl` | 整合本体、数据和词汇表的版本 |
 | `06-mtr-rules-start.ttl` | 使用 SHACL 描述的校验规则与形状 |
 
-`03-mtr-model-start.ttl` 与 `03-Penguin.ttl` 当前内容完全相同；本仓库保留 `03-Penguin.ttl`，并通过 `.gitignore` 排除重复文件。原文件仍留在本地目录中。
+`03-mtr-model-start.ttl` 与 `03-Penguin.ttl` 内容完全相同；仓库保留 `03-Penguin.ttl`，并通过 `.gitignore` 排除重复文件。原文件仍留在本地目录中。
 
 ## 打开文件
 
