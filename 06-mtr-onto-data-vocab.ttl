@@ -1,0 +1,455 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sh:  <http://www.w3.org/ns/shacl#> .
+@prefix md: <http://data.mtr.hk/> .
+@prefix mo: <http://onto.mtr.hk/> .
+@prefix mv: <http://vocab.mtr.hk/> .
+@prefix ms: <http://shape.mtr.hk/> .
+
+
+
+########### The ONTOLOGY  #############
+
+<http://onto.mtr.hk/> rdf:type owl:Ontology ;
+                      rdfs:label "The MTR Ontology"@en ;
+                      rdfs:comment "This ontology covers Lines, Stations, Services, and Exits"@en ;
+                      owl:versionInfo "1.0" ;
+                      ### Import the SKOS Ontology 
+                      owl:imports <http://www.w3.org/2004/02/skos/core#>  .
+
+### CLASSES
+
+mo:TrainLine rdf:type owl:Class ;
+ rdfs:label "Train Line"@en .
+
+mo:TrainService rdf:type owl:Class ;
+ rdfs:label "Train Service"@en .
+
+mo:TrainStation rdf:type owl:Class ;
+ rdfs:label "Train Station"@en .
+
+mo:StationExit rdf:type owl:Class ;
+ rdfs:label "Station Exit"@en .
+
+mo:Landmark rdf:type owl:Class ;
+ rdfs:label "Station Exit Landmark"@en .
+
+ mo:University rdf:type owl:Class ;
+   rdfs:subClassOf mo:Landmark ;
+   rdfs:label "University Landmark"@en .
+
+### Disjoint CLASSES
+
+mo:TrainStation  owl:disjointWith mo:University .
+
+#### CLASSIFIER CLASSES
+
+mo:UniversityTrainStation owl:equivalentClass [
+    rdf:type owl:Class ;
+    rdfs:label "University Train Station"@en ;
+    owl:intersectionOf (
+        mo:TrainStation
+        [ rdf:type owl:Restriction ;
+          owl:onProperty mo:hasStationLandmark ;
+          owl:someValuesFrom mo:University
+        ]
+    )
+] .
+
+
+### OBJECT PROPERTIES
+
+mo:runsOnTrainLine rdf:type owl:ObjectProperty ;
+ rdfs:label "Runs On Train Line"@en ;
+ rdfs:domain mo:TrainService ;
+ rdfs:range mo:TrainLine .
+
+mo:hasTrainStation rdf:type owl:ObjectProperty ;
+ rdfs:label "Has Train Station"@en ;
+ rdfs:domain mo:TrainService ;
+ rdfs:range mo:TrainStation .
+
+mo:hasFollowingStation rdf:type owl:ObjectProperty ;
+ rdfs:label "Has Following Station"@en ;
+ rdfs:domain mo:TrainService ;
+ rdfs:range mo:TrainStation .
+
+mo:hasPrecedingStation rdf:type owl:ObjectProperty ;
+ rdfs:label "Has Preceding Station"@en ;
+ rdfs:domain mo:TrainService ;
+ rdfs:range mo:TrainStation .
+
+mo:hasStationExit rdf:type owl:ObjectProperty ;
+ rdfs:label "Has Station Exit"@en ;
+ rdfs:domain mo:TrainStation ;
+ rdfs:range mo:StationExit .
+
+mo:hasLandmarkExit rdf:type owl:ObjectProperty ;
+ rdfs:label "Has Landmark Exit"@en ;
+ rdfs:domain mo:StationExit ;
+ rdfs:range mo:Landmark .
+
+#### SUB PROPERTIES
+
+mo:hasTerminusStation rdf:type owl:ObjectProperty ;
+ rdfs:subPropertyOf mo:hasTrainStation ;
+ rdfs:label "Has Terminus Station"@en .
+
+
+#### INVERSE OBJECT PROPERTIES
+
+mo:hasTrainService rdf:type owl:ObjectProperty ;
+ owl:inverseOf mo:hasTrainStation ;
+ rdfs:label "Has Train Service"@en .
+
+mo:hasTrainLineService rdf:type owl:ObjectProperty ;
+ owl:inverseOf mo:runsOnTrainLine ;
+ rdfs:label "Has Train Line Service"@en .
+
+mo:exitForTrainStation rdf:type owl:ObjectProperty ;
+ owl:inverseOf mo:hasStationExit ;
+ rdfs:label "Exit For Train Station"@en .
+
+
+#### PROPERTY CHAINS
+
+mo:hasStationLandmark rdf:type owl:ObjectProperty ;      
+ rdfs:label "Has Station Landmark"@en ;
+ owl:propertyChainAxiom                
+  ( mo:hasStationExit  mo:hasLandmarkExit ) .
+
+mo:hasTrainLineStation rdf:type owl:ObjectProperty ;      
+ rdfs:label "Has Train Line Station"@en ;
+ owl:propertyChainAxiom                
+  ( mo:hasTrainLineService  mo:hasTrainStation ) .
+
+#### DATATYPE PROPERTIES
+
+mo:streetExit rdf:type owl:DatatypeProperty ;
+ rdfs:label "Street Exit"@en ;
+ rdfs:domain mo:StationExit ;
+ rdfs:range rdf:langString .
+
+mo:platformFollowing rdf:type owl:DatatypeProperty ;
+ rdfs:label "Platform Following"@en ;
+ rdfs:domain mo:TrainService ;
+ rdfs:range xsd:string .
+
+mo:platformPreceding rdf:type owl:DatatypeProperty ;
+ rdfs:label "Platform Preceding"@en ;
+ rdfs:domain mo:TrainService ;
+ rdfs:range xsd:string .
+
+#####  Properties for VOCABULARIES ######
+
+mo:hasLocale rdf:type owl:ObjectProperty ;
+   rdfs:label "Has Locale"@en ;
+   rdfs:domain mo:TrainLine .
+
+mo:hasLivery rdf:type owl:ObjectProperty ;
+   rdfs:label "Has Livery"@en ;
+   rdfs:domain mo:TrainStation .
+
+mo:hasConnection rdf:type owl:ObjectProperty ;
+   rdfs:label "Has Connection"@en ;
+   rdfs:domain mo:TrainStation .
+
+
+##### SKOS VOCABULARIES #######
+
+### District Vocab Scheme
+
+mv:DistrictVocab rdf:type skos:ConceptScheme ;
+            skos:prefLabel "HK District Vocabulary"@en .
+
+mv:district:Eastern rdf:type skos:Concept ;
+    skos:prefLabel "Eastern"@en ;
+    skos:inScheme mv:DistrictVocab .
+
+mv:district:CentralWestern rdf:type skos:Concept ;
+    skos:prefLabel "Central & Western"@en ;
+    skos:inScheme mv:DistrictVocab .
+
+mv:district:WanChai rdf:type skos:Concept ;
+    skos:prefLabel "Wan Chai"@en ;
+    skos:inScheme mv:DistrictVocab .
+
+mv:district:TsuenWan rdf:type skos:Concept ;
+    skos:prefLabel "Tsuen Wan"@en ;
+    skos:inScheme mv:DistrictVocab .
+
+mv:district:KwaiTsing rdf:type skos:Concept ;
+    skos:prefLabel "Kwai Tsing"@en ;
+    skos:inScheme mv:DistrictVocab .
+
+mv:district:ShamShuiPo rdf:type skos:Concept ;
+    skos:prefLabel "Sham Shui Po"@en ;
+    skos:inScheme mv:DistrictVocab .
+
+mv:district:YauTsimMong rdf:type skos:Concept ;
+    skos:prefLabel "Yau Tsim Mong"@en ;
+    skos:inScheme mv:DistrictVocab .
+
+### Colour Vocab Scheme
+
+mv:ColourVocab rdf:type skos:ConceptScheme ;
+      skos:prefLabel "Colour Vocabulary"@en .
+
+mv:colour:Blue rdf:type skos:Concept ;
+    skos:prefLabel "Blue"@en ;
+    skos:inScheme mv:ColourVocab ;
+    skos:exactMatch <https://vocabolario.github.io/colour/blue> .
+
+mv:colour:LimeGreen rdf:type skos:Concept ;
+    skos:prefLabel "Lime Green"@en ;
+    skos:inScheme mv:ColourVocab ;
+    skos:exactMatch <https://vocabolario.github.io/colour/limegreen> .
+
+mv:colour:Red rdf:type skos:Concept ;
+    skos:prefLabel "Red"@en ;
+    skos:inScheme mv:ColourVocab ;
+    skos:exactMatch <https://vocabolario.github.io/colour/red> .
+
+mv:colour:LightPurple rdf:type skos:Concept ;
+    skos:prefLabel "Light Purple"@en ;
+    skos:inScheme mv:ColourVocab ;
+    skos:exactMatch <https://vocabolario.github.io/colour/lightpurple> .
+
+mv:colour:Yellow rdf:type skos:Concept ;
+    skos:prefLabel "Yellow"@en ;
+    skos:inScheme mv:ColourVocab ;
+    skos:exactMatch <https://vocabolario.github.io/colour/yellow> .
+
+mv:colour:Brown rdf:type skos:Concept ;
+    skos:prefLabel "Brown"@en ;
+    skos:inScheme mv:ColourVocab .
+
+### Transport Vocab Scheme
+
+mv:TransportVocab rdf:type skos:ConceptScheme ;
+    skos:prefLabel "Transport Vocabulary"@en ;
+    skos:hasTopConcept mv:transport:Tram, mv:transport:Bus, mv:transport:Ferry .
+
+mv:transport:Tram rdf:type skos:Concept ;
+    skos:prefLabel "Tram"@en ;
+    skos:inScheme mv:TransportVocab ;
+    skos:narrower mv:transport:PeakTram .
+
+mv:transport:PeakTram rdf:type skos:Concept ;
+    skos:prefLabel "Peak Tram"@en ;
+    skos:inScheme mv:TransportVocab .
+
+mv:transport:Bus rdf:type skos:Concept ;
+    skos:prefLabel "Bus"@en ;
+    skos:inScheme mv:TransportVocab ;
+    skos:narrower mv:transport:MiniBus .
+
+mv:transport:MiniBus rdf:type skos:Concept ;
+    skos:prefLabel "Mini Bus"@en ;
+    skos:inScheme mv:TransportVocab .
+
+mv:transport:Ferry rdf:type skos:Concept ;
+    skos:inScheme mv:TransportVocab ;
+    skos:prefLabel "Ferry"@en .
+
+
+
+########## The Data INDIVIDUALS ############
+
+### The Train Lines
+
+md:line:island rdf:type mo:TrainLine;
+  rdfs:label "Island Train Line"@en, "港岛线"@zh-cn ;
+  mo:hasLocale mv:district:Eastern, mv:district:CentralWestern, mv:district:WanChai .
+
+md:line:tsuenwan rdf:type mo:TrainLine;
+  rdfs:label "Tsuen Wan Train Line"@en, "荃湾线"@zh-cn ;
+  mo:hasLocale mv:district:CentralWestern, mv:district:TsuenWan, mv:district:KwaiTsing, mv:district:ShamShuiPo, mv:district:YauTsimMong .
+
+### The Train Stations
+
+md:station:central rdf:type mo:TrainStation ;
+  rdfs:label "Central Station"@en, "中环"@zh-cn;
+  mo:hasStationExit md:exit:central:c, md:exit:central:d2 ;
+  mo:hasLivery mv:colour:Red ;
+  mo:hasConnection mv:transport:Tram, mv:transport:PeakTram, mv:transport:Bus, mv:transport:MiniBus, mv:transport:Ferry .
+
+md:station:sheungwan rdf:type mo:TrainStation ;
+  rdfs:label "Sheung Wan Station "@en ;
+  mo:hasStationExit md:exit:sheungwan:e3 ;
+  mo:hasLivery mv:colour:Brown ;
+  mo:hasConnection mv:transport:Tram, mv:transport:Bus, mv:transport:MiniBus, mv:transport:Ferry .
+
+md:station:admiralty rdf:type mo:TrainStation ;
+  rdfs:label "Admiralty Station"@en ;
+  mo:hasStationExit md:exit:admiralty:b ;
+  mo:hasLivery mv:colour:Blue ;
+  mo:hasConnection mv:transport:Tram, mv:transport:PeakTram, mv:transport:Bus, mv:transport:MiniBus .
+
+md:station:saiyingpun rdf:type mo:TrainStation ;
+  rdfs:label "Sai Ying Pun Station"@en ;
+  mo:hasStationExit md:exit:saiyingpun:a1 ;
+  mo:hasLivery mv:colour:Yellow ;
+  mo:hasConnection mv:transport:Tram, mv:transport:Bus, mv:transport:MiniBus .
+
+md:station:hku rdf:type mo:TrainStation ;
+  rdfs:label "HKU Station"@en ;
+  mo:hasStationExit md:exit:hku:a2 ;
+  mo:hasLivery mv:colour:LightPurple ;
+  mo:hasConnection mv:transport:Bus, mv:transport:MiniBus .
+
+md:station:wanchai rdf:type mo:TrainStation ;
+  rdfs:label "Wan Chai Station"@en ;
+  mo:hasStationExit md:exit:wanchai:b1b2 ;
+  mo:hasConnection mv:transport:Bus ;
+  mo:hasLivery mv:colour:Red .
+
+md:station:causewaybay rdf:type mo:TrainStation ;
+  rdfs:label "Causeway Bay Station"@en ;
+  mo:hasStationExit md:exit:causewaybay:c ;
+  mo:hasConnection mv:transport:Bus ;
+  mo:hasLivery mv:colour:Red .
+
+md:station:tsimshatsui rdf:type mo:TrainStation ;
+  rdfs:label "Tsim Sha Tsui Station"@en ;
+  mo:hasStationExit md:exit:tsimshatsui:c1 ;
+  mo:hasConnection mv:transport:Bus ;
+  mo:hasLivery mv:colour:Red .
+
+### The Train Station Exits
+
+md:exit:central:c rdf:type mo:StationExit ;
+  rdfs:label "Central Exit C"@en ;
+  mo:streetExit "Li Yuen Street (East & West)"@en .
+
+md:exit:central:d2 rdf:type mo:StationExit ;
+  rdfs:label "Central Exit D2"@en ;
+  mo:streetExit "Queens Road"@en ;
+  mo:hasLandmarkExit <https://en.wikipedia.org/wiki/Lan_Kwai_Fong> .
+
+md:exit:sheungwan:e3 rdf:type mo:StationExit ;
+  rdfs:label "Sheung Wan Exit E3"@en ;
+  mo:streetExit "Des Voeux Road Central"@en ;
+  mo:hasLandmarkExit <https://en.wikipedia.org/wiki/Wing_Ong> .
+
+md:exit:admiralty:b rdf:type mo:StationExit ;
+  rdfs:label "Admiralty Exit B"@en ;
+  mo:streetExit "Drake Street"@en ;
+  mo:hasLandmarkExit <https://en.wikipedia.org/wiki/Lippo_Centre_(Hong_Kong)> .
+
+md:exit:tsimshatsui:c1 rdf:type mo:StationExit ;
+  rdfs:label "Tsim Sha Tsui Exit C1"@en ;
+  mo:streetExit "Nathan Road"@en ;
+  ### Add new Landmark
+  mo:hasLandmarkExit md:uni:tstu .
+
+md:exit:causewaybay:c rdf:type mo:StationExit ;
+  rdfs:label "Causeway Bay Exit C"@en ;
+  mo:hasLandmarkExit <https://en.wikipedia.org/wiki/Sino_Plaza> .
+
+md:exit:wanchai:b1b2 rdf:type mo:StationExit ;
+  rdfs:label "Wan Chai B1"@en, "Wan Chai B2"@en  ;
+  mo:streetExit "Southorn Playground"@en .
+
+md:exit:hku:a2 rdf:type mo:StationExit ;
+  rdfs:label "HKU Exit A2"@en ;
+  ## mo:hasLandmarkExit <https://en.wikipedia.org/wiki/University_of_Hong_Kong> .
+  ## Update the Landmark
+  mo:hasLandmarkExit md:uni:hku .
+
+md:exit:saiyingpun:a1 rdf:type mo:StationExit ;
+  rdfs:label "Sai Ying Pun Exit A1"@en ;
+  mo:streetExit "Sai Woo Lane"@en ;
+  mo:hasLandmarkExit <https://en.wikipedia.org/wiki/Tung_Wah_Hospital> .
+
+
+### The Train Services
+
+md:service:island:central rdf:type mo:TrainService ;
+  rdfs:label "Island - Central Service"@en ;
+  mo:runsOnTrainLine md:line:island ;
+  mo:hasTrainStation md:station:central ;
+  mo:hasPrecedingStation md:station:sheungwan ;
+  mo:platformPreceding "4"^^xsd:string ;
+  mo:hasFollowingStation md:station:admiralty ;
+  mo:platformFollowing "3"^^xsd:string .
+
+md:service:island:sheungwan rdf:type mo:TrainService ;
+  rdfs:label "Island - Sheung Wan Service"@en ;
+  mo:runsOnTrainLine md:line:island ;
+  mo:hasTrainStation md:station:sheungwan ;
+  mo:hasPrecedingStation md:station:saiyingpun ;
+  mo:platformPreceding "1"^^xsd:string ;
+  mo:hasFollowingStation md:station:central ;
+  mo:platformFollowing "2"^^xsd:string .
+
+md:service:tsuenwan:central rdf:type mo:TrainService ;
+  rdfs:label "Tsuen Wan - Central Service"@en ;
+  mo:runsOnTrainLine md:line:tsuenwan ;
+  mo:hasTerminusStation md:station:central ;
+  mo:hasFollowingStation md:station:admiralty ;
+  mo:platformFollowing "1"^^xsd:string, "2"^^xsd:string .
+
+md:service:tsuenwan:admiralty rdf:type mo:TrainService ;
+  rdfs:label "Tsuen Wan - Admiralty Service"@en ;
+  mo:runsOnTrainLine md:line:tsuenwan ;
+  mo:hasTrainStation md:station:admiralty ;
+  mo:hasPrecedingStation md:station:central ;
+  mo:platformPreceding "4"^^xsd:string ;
+  mo:hasFollowingStation md:station:tsimshatsui ;
+  mo:platformFollowing "1"^^xsd:string .
+
+md:service:island:saiyingpun rdf:type mo:TrainService ;
+  rdfs:label "Island - Sai Ying Pun Service"@en ;
+  mo:runsOnTrainLine md:line:island ;
+  mo:hasTrainStation md:station:saiyingpun ;
+  mo:hasPrecedingStation md:station:hku ;
+  mo:platformPreceding "2"^^xsd:string ;
+  mo:hasFollowingStation md:station:sheungwan ;
+  mo:platformFollowing "1"^^xsd:string .
+
+md:service:island:admiralty rdf:type mo:TrainService ;
+  rdfs:label "Island - Admiralty Service"@en ;
+  mo:runsOnTrainLine md:line:island ;
+  mo:hasTrainStation md:station:admiralty ;
+  mo:hasPrecedingStation md:station:central ;
+  mo:platformPreceding "2"^^xsd:string ;
+  mo:hasFollowingStation md:station:wanchai ;
+  mo:platformFollowing "1"^^xsd:string .
+
+md:service:island:wanchai rdf:type mo:TrainService ;
+  rdfs:label "Island - Wan Chai Service"@en ;
+  mo:runsOnTrainLine md:line:island ;
+  mo:hasTrainStation md:station:wanchai ;
+  mo:hasPrecedingStation md:station:admiralty ;
+  mo:platformPreceding "2"^^xsd:string ;
+  mo:hasFollowingStation md:station:causewaybay ;
+  mo:platformFollowing "1"^^xsd:string .
+
+### Add the UNIVERSITY Individuals 
+
+md:uni:hku rdf:type mo:University ;
+  rdfs:label "HK University"@en .
+
+md:uni:tstu rdf:type mo:University ;
+  rdfs:label "TST Univeristy"@en .
+
+### Different INDIVIDUALS
+
+md:uni:hku owl:differentFrom md:station:hku .
+
+### SameAs INDIVIDUALS
+
+##  md:uni:hku owl:sameAs md:station:hku .
+
+### Assert the Landmarks
+
+ <https://en.wikipedia.org/wiki/Lan_Kwai_Fong> rdf:type mo:Landmark .
+ <https://en.wikipedia.org/wiki/Wing_Ong> rdf:type mo:Landmark .
+ <https://en.wikipedia.org/wiki/Lippo_Centre_(Hong_Kong)> rdf:type mo:Landmark .
+ <https://en.wikipedia.org/wiki/Sino_Plaza> rdf:type mo:Landmark .
+ <https://en.wikipedia.org/wiki/University_of_Hong_Kong> rdf:type mo:Landmark .
+ <https://en.wikipedia.org/wiki/Tung_Wah_Hospital>  rdf:type mo:Landmark.

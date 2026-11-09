@@ -1,0 +1,15 @@
+# Temporary and generated files
+*.tmp
+*.bak
+*~
+
+# Editor and operating system metadata
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Exact duplicate of 03-Penguin.ttl; keep the original file locally, but not in Git
+/03-mtr-model-start.ttl

@@ -1,0 +1,206 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sh:  <http://www.w3.org/ns/shacl#> .
+@prefix md: <http://data.mtr.hk/> .
+@prefix mo: <http://onto.mtr.hk/> .
+@prefix mv: <http://vocab.mtr.hk/> .
+@prefix ms: <http://shape.mtr.hk/> .
+
+
+########### SHACL Rules  #############
+
+#### Common Property Shapes
+
+ms:LabelLangShape rdf:type sh:PropertyShape ; 
+        rdfs:label "Label Languages Property Shape" ;            
+        sh:path  rdfs:label ; 
+        sh:datatype rdf:langString ;
+        sh:languageIn ( "en"  "zh" ) ;
+        sh:minCount 1 ;
+        sh:maxCount 2 ;  
+        sh:message "Label Language Tag - Error" .
+
+#### SKOS Vocabulary Shapes
+
+ms:DistrictVocabShape rdf:type sh:NodeShape;
+    sh:property [
+        sh:path skos:inScheme ;
+        sh:hasValue mv:DistrictVocab ;
+        sh:maxCount 1 ;
+        sh:minCount 1 ;
+    ] .
+
+ms:ColourVocabShape rdf:type sh:NodeShape;
+    sh:property[
+        sh:message skos:inScheme ;
+        sh:hasValue mv:ColourVocab ;
+        sh:maxCount 1 ;
+        sh:minCount 1 ;
+        sh:message "Colour Vocabulary - inScheme Error"
+    ] .
+ 
+ms:TransportVocabShape rdf:type sh:NodeShape;
+     sh:property[
+        sh:path skos:inScheme ;
+        sh:hasValue mv:TransportVocab ;
+        sh:maxCount 1 ;
+        sh:minCount 1 ;
+        sh:message "Transport Vocabulary - inScheme Error"
+    ] .
+
+#### Train Line Shape
+
+ms:TrainLineShape rdf:type sh:NodeShape ;
+    rdfs:label "Train Line Shape" ;        
+    sh:targetClass mo:TrainLine ;
+    sh:property ms:LabelLangShape ;
+    sh:property [    
+        rdf:type sh:PropertyShape   ;       
+        sh:path mo:hasLocale ;     
+        sh:class skos:Concept ;   
+        sh:minCount 1 ;
+        sh:node ms:DistrictVocabShape ;
+        sh:message "Train Line - Locale Vocab - Error" 
+    ] ;
+    sh:property [
+       rdf:type sh:PropertyShape ;
+        sh:path mo:hasTrainLineService ;
+        sh:class mo:TrainService ;
+        sh:minCount 1 ;
+        sh:message "Train Line - Train Service - Error"
+    ] .
+
+####  Train Station Shape
+
+ms:TrainStationShape rdf:type sh:NodeShape ;
+    rdfs:label "Train Station Shape" ;        
+    sh:targetClass mo:TrainStation ;
+    sh:property ms:LabelLangShape ;
+    sh:property [  
+        rdf:type sh:PropertyShape   ;         
+        sh:path mo:hasStationExit ;     
+        sh:class mo:StationExit ;   
+        sh:minCount 1 ;
+        sh:message "Train Station - Station Exit - Error"  
+    ] ;
+    sh:property [
+        rdf:type sh:PropertyShape ;
+        sh:path mo:hasLivery ;
+        sh:class skos:Concept ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:node ms:ColourVocabShape ;
+        sh:message "Train Station - Livery Vocab - Error"
+    ] ;
+
+    sh:property [
+        rdf:type sh:PropertyShape ;
+        sh:path mo:hasConnection ;
+        sh:class skos:Concept ;
+        sh:minCount 1 ;
+        sh:node ms:TransportVocabShape ;
+        sh:message "Train Station - Connection Vocab - Error"
+    ] .
+
+
+#### Station Exit Shape
+
+ms:StationExit rdf:type sh:NodeShape ;
+    rdfs:label "Station Exit Shape" ;            
+    sh:targetClass mo:StationExit ;
+    sh:property ms:LabelLangShape ;
+    sh:property [  
+        rdf:type sh:PropertyShape   ;          
+        sh:path mo:streetExit ;     
+        sh:datatype rdf:langString ;   
+        sh:minCount 0 ;
+        sh:message "Station Exit - Street - Error" 
+    ] ;
+    sh:property [
+        rdf:type sh:PropertyShape ;
+        sh:path mo:hasLandmarkExit ;
+        sh:class mo:Landmark ;
+        sh:minCount 0 ;
+        sh:message "Station Exit - Landmark - Error"
+    ] .
+
+
+#### Train Service Shape
+
+ms:RunsOnTrainLineShape rdf:type sh:PropertyShape  ;        
+        sh:path mo:runsOnTrainLine ;     
+        sh:class mo:TrainLine;   
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "Train Service - Runs on Train Line - Error" .
+
+ms:HasTrainStationShape rdf:type sh:PropertyShape  ;        
+        sh:path mo:hasTrainStation ;     
+        sh:class mo:TrainStation;   
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "Train Service - Has Train Station - Error" .
+
+ms:HasTerminusStationShape rdf:type sh:PropertyShape  ;        
+        sh:path mo:hasTerminusStation ;     
+        sh:class mo:TrainStation;   
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "Train Service - Has Train Terminus - Error" .
+
+ms:HasPrecedingStationShape rdf:type sh:PropertyShape   ;         
+        sh:path mo:hasPrecedingStation ;     
+        sh:class mo:TrainStation ; 
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "Train Service - Has Preceding Station - Error" .
+
+ms:HasFollowingStationShape rdf:type sh:PropertyShape   ;         
+        sh:path mo:hasFollowingStation ;     
+        sh:class mo:TrainStation ; 
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "Train Service - Has Following Station - Error" .
+
+ms:PlatformFollowingShape  rdf:type sh:PropertyShape   ;     
+        sh:path mo:platformFollowing ;     
+        sh:datatype xsd:string ;   
+        sh:minCount 1 ;
+        sh:maxCount 2 ;
+        sh:message "Train Service - Platform Following  - Error" .
+
+ ms:PlatformPrecedingShape  rdf:type sh:PropertyShape  ;       
+        sh:path mo:platformPreceding ;     
+        sh:datatype xsd:string ;   
+        sh:minCount 1 ;
+        sh:maxCount 2 ;
+        sh:message "Train Service - Platform Preceding - Error" .
+
+
+ms:TrainServiceShape rdf:type sh:NodeShape ;
+    rdfs:label "Train Service Shape" ;        
+    sh:targetClass mo:TrainService ;
+    sh:property ms:LabelLangShape ;
+    sh:property ms:RunsOnTrainLineShape ;
+    sh:or (
+        [
+            sh:property ms:HasTerminusStationShape ;
+            sh:property ms:HasFollowingStationShape ;
+            sh:property ms:PlatformFollowingShape
+        ] 
+        [
+            sh:property ms:HasTrainStationShape ;
+            sh:property ms:HasFollowingStationShape ;
+            sh:property ms:PlatformFollowingShape ;
+            sh:property ms:HasPrecedingStationShape ;
+            sh:property ms:PlatformPrecedingShape ;
+            sh:not [
+                sh:property ms:HasTerminusStationShape
+            ]
+        ]
+    ) .
+
+
